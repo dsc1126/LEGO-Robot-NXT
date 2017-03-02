@@ -1,6 +1,6 @@
 function turn(angle)
     TurningSpeed    = 50;
-    turnTicks       = (219/45)*(angle/2);      % assuming 45dgs turn is 219 ticks
+    turnTicks       = uint16((300/45)*(angle/2));      % assuming 45dgs turn is 219 ticks
     Ports           = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
     
     mTurn1                      = NXTMotor(Ports(2)); % is it needed to swap ports?

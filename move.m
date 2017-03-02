@@ -4,7 +4,7 @@ function move(distance)
     dist    = distance*const;
     
     % motor speed
-    power = 100;
+    power = -50;
     Ports = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
     
      % create motor object with defined variables
