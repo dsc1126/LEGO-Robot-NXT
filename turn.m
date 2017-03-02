@@ -6,8 +6,13 @@ function turn(angle)
     mTurn1                      = NXTMotor(Ports(2)); % is it needed to swap ports?
     mTurn1.SpeedRegulation      = false;  % we could use it if we wanted
     mTurn1.Power                = TurningSpeed;
-    mTurn1.TachoLimit           = turnTicks;
     mTurn1.ActionAtTachoLimit   = 'Brake';
+    
+    % where are we?
+    mTurn1.ResetPosition();
+    data    = mTurn1.ReadFromNXT();
+    pos     = data.Position;
+    mTurn1.TachoLimit           = turnTicks + pos;
     
     
     mTurn2          = mTurn1;
@@ -16,6 +21,12 @@ function turn(angle)
     
     mTurn1.SendToNXT(); % first turn angle/2 by driving one wheel forward
     mTurn1.WaitFor();
+    
+    % re-check where we are
+    mTurn2.ResetPosition();
+    data    = mTurn2.ReadFromNXT();
+    pos     = data.Position;
+    mTurn2.TachoLimit           = turnTicks + pos;
     
     mTurn2.SendToNXT(); % then turn angle/2 by driving the othew wheel backward
     mTurn2.WaitFor();

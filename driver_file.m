@@ -25,11 +25,11 @@ a = robotUltrascan();
 % end
 %% Particle Filter
 % @input: map
-% @output: estimatedLocation
+% @output: estimatedLocation, estimatedAngle
 
 %% Path Planning
 % @input: position, angle, target, map
-% @output: pathArray
+% @output: pathArray, lost
 
 %% Path Move
 % @input: currentPosition, nextPosition, map

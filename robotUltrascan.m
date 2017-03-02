@@ -1,16 +1,16 @@
 function [scanValues] = robotUltrascan()
     % Initialize the sound sensor by setting the sound sensor mode and input port. 
-    OpenSound(SENSOR_1, 'DB');
+    OpenSound(SENSOR_4, 'DB');
 
     % init values
     power = -40;
     Ports = [MOTOR_A];  % motorports for left and right wheel
-    nrScans = 20;
+    nrScans = 6;
     scanValues = zeros(nrScans,1);
 
     for i=1:nrScans
         % Get the current sound sensor value in dB.
-        scanValues(i) = GetSound(SENSOR_1)
+        scanValues(i) = GetSound(SENSOR_4);
 
         % create motor object with defined variables
         mScan                       = NXTMotor(Ports);
@@ -18,8 +18,13 @@ function [scanValues] = robotUltrascan()
         mScan.SpeedRegulation       = false; % not sure what this actually mean
         mScan.Power                 = power;
         mScan.ActionAtTachoLimit    = 'Brake';
-        mScan.TachoLimit            = 360/nrScans;
-
+        
+        % where are we?
+        mScan.ResetPosition();
+        data                = mScan.ReadFromNXT();
+        pos                 = data.Position;
+        mScan.TachoLimit    = (360/nrScans)+pos;
+        
         % move
         mScan.SendToNXT();
         mScan.WaitFor();
@@ -32,5 +37,5 @@ function [scanValues] = robotUltrascan()
     mScan.WaitFor();
 
     % Close the sound sensor.
-    CloseSensor(SENSOR_2);
+    CloseSensor(SENSOR_4);
 end
