@@ -1,6 +1,6 @@
-function [botSim] = pathPlanning(botSim,modifiedMap,target,position,angle)
-        limsMin = min(modifiedMap); % minimum limits of the map
-        limsMax = max(modifiedMap); % maximum limits of the map
+function [path] = pathPlanning(position, target, map)
+        limsMin = min(map); % minimum limits of the map
+        limsMax = max(map); % maximum limits of the map
         if(limsMin(1)<0) %compensate for negative map start
             target(1)=target(1)-limsMin(1);
             position(1)=position(1)-limsMin(1);
@@ -45,7 +45,7 @@ function [botSim] = pathPlanning(botSim,modifiedMap,target,position,angle)
         if(limsMax(1)>200 || limsMax(2)>200)
             prm.NumNodes = 500; %if the map is big
         end
-        prm.ConnectionDistance = 200; %max distance between nodes
+        prm.ConnectionDistance = 25; %max distance between nodes
         startLocation = position;
         endLocation = target;
         path = findpath(prm, startLocation, endLocation); %path planning
@@ -67,34 +67,6 @@ function [botSim] = pathPlanning(botSim,modifiedMap,target,position,angle)
                 path(i,2)=path(i,2)+limsMin(2);
             end
             target(1)=target(1)+limsMin(1);
-        end
-
-        for i = 1:length(path)-1
-            deltaX = path(i+1,1)-path(i,1);
-            deltaY = path(i+1,2)-path(i,2);
-            theta=atan(abs(deltaY)/abs(deltaX));
-            if(deltaX>0 && deltaY>0)
-                botSim.turn(-angle); %turn back to 0dgr
-                botSim.turn(theta); %turn towards goal
-                angle=theta;
-            elseif(deltaX<0 && deltaY>0)
-                botSim.turn(-angle); %turn back to 0dgr
-                botSim.turn(pi); %turn 180dgr
-                botSim.turn(-theta); %turn towards goal
-                angle=pi-theta;
-            elseif(deltaX>0 && deltaY<0)
-                botSim.turn(-angle); %turn back to 0dgr
-                botSim.turn(3*pi/2); %turn 270dgr
-                botSim.turn(theta); %turn towards goal
-                angle=(3*pi/2)+theta;
-            elseif(deltaX<0 && deltaY<0)
-                botSim.turn(-angle); %turn back to 0dgr
-                botSim.turn(pi); %turn 270dgr
-                botSim.turn(theta); %turn towards goal
-                angle=pi+theta;
-            end
-            move=sqrt((deltaX^2)+(deltaY^2));
-            botSim.move(move);
         end
 end
 
