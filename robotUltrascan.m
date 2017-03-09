@@ -1,16 +1,16 @@
 function [scanValues] = robotUltrascan()
     % Initialize the sound sensor by setting the sound sensor mode and input port. 
-    OpenSound(SENSOR_4, 'DB');
+    OpenUltrascan(SENSOR_4, 'DB');
 
     % init values
     power = -40;
     Ports = [MOTOR_A];  % motorports for left and right wheel
-    nrScans = 6;
+    nrScans = 30;
     scanValues = zeros(nrScans,1);
 
     for i=1:nrScans
         % Get the current sound sensor value in dB.
-        scanValues(i) = GetSound(SENSOR_4);
+        scanValues(i) = GetUltrascan(SENSOR_4);
 
         % create motor object with defined variables
         mScan                       = NXTMotor(Ports);
