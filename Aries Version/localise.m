@@ -8,7 +8,8 @@ modifiedMap = map; %you need to do this modification yourself
 botSim.setMap(modifiedMap);
 
 %% Key Parameters
-navigation = 1; %Set with value '1' to enable navigation, '0' to enable navigation  
+navigation = 1; %Set with value '1' to enable navigation, '0' to disable navigation  
+%real_robot = 0; %Set with value '1' to enable controlling real robot, '0' to disable controlling real robot  
 num = 500; %800; %number of particles
 Min_distance = 5; %minDistance from the walls
 scans = 6; %64; %number of scans in 360 degree
@@ -148,10 +149,10 @@ if stage == 0
             right_index=scans*3/6;%scans*3/4;
             [left_distance] = botScan(left_index);
             [right_distance] = botScan(right_index);
-            if (right_distance < left_distance && left_distance > 5) %0.5 %turn left               
+            if (right_distance < left_distance && left_distance > 15) %0.5 %turn left               
                 turn_angle = (left_index-1)*2*pi/scans;            
                 move_distance= left_distance*0.7;
-            elseif (left_distance < right_distance && right_distance > 5) %turn right        
+            elseif (left_distance < right_distance && right_distance > 15) %turn right        
                 turn_angle = (right_index-1)*2*pi/scans;
                 move_distance= right_distance*0.7;
             end
@@ -167,7 +168,7 @@ if stage == 0
     botSim.turn(turn_angle);        
     botSim.move(round(move_distance*10));
     
-    turn(turn_angle); %*180/pi %turn the real robot
+    turn(turn_angle*180/pi); %turn the real robot
     move(uint16(round(move_distance*10))); %move the real robot
     
     for i =1:num %for all the particles.
@@ -420,7 +421,7 @@ for m = 1:(num_waypoints-1)
     turn_angle = angle-Estimated_angle;
 
     botSim.turn(turn_angle);
-    turn(turn_angle); %*180/pi %turn the real robot
+    turn(turn_angle*180/pi); %turn the real robot
     Estimated_Bot.turn(turn_angle);
     Estimated_angle = Estimated_Bot.getBotAng();
     Estimated_BotScan = Estimated_Bot.ultraScan();
