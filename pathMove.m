@@ -15,6 +15,8 @@ function [angle] = pathMove(position, angle, target)
         turn(-angle+pi+theta);
         angle=pi+theta;
     end
-    move=sqrt((deltaX^2)+(deltaY^2));
-    move(move);
+    move=round(sqrt((deltaX^2)+(deltaY^2)));
+    if(move>0)
+        moveRobot(move);
+    end
 end

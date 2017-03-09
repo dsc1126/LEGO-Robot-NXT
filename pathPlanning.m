@@ -1,4 +1,4 @@
-function [path] = pathPlanning(position, target, map)
+function [path] = pathPlanning(position, target, map, botSim)
         limsMin = min(map); % minimum limits of the map
         limsMax = max(map); % maximum limits of the map
         if(limsMin(1)<0) %compensate for negative map start
@@ -45,7 +45,7 @@ function [path] = pathPlanning(position, target, map)
         if(limsMax(1)>200 || limsMax(2)>200)
             prm.NumNodes = 500; %if the map is big
         end
-        prm.ConnectionDistance = 25; %max distance between nodes
+        prm.ConnectionDistance = 250; %max distance between nodes
         startLocation = position;
         endLocation = target;
         path = findpath(prm, startLocation, endLocation); %path planning

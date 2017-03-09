@@ -29,7 +29,7 @@ testTarget = [40 40];
 angle = 0;
 path = pathPlanning(testPos, testTarget, map, botSim)
 for i=1:length(path)-1
-    angle = pathMove([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)]);
+    angle = pathMove([path(1,i),path(2,i)], angle, [path(1,i+1),path(2,i+1)]);
 end
 
 

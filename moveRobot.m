@@ -1,4 +1,4 @@
-function move(distance)
+function moveRobot(distance)
     % const will be determined by measurement
     const   = 1;
     dist    = distance*const;
