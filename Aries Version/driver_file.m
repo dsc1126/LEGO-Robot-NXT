@@ -31,10 +31,13 @@ botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on
 botSim.drawMap();
 drawnow;
 
-botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
-target = botSim.getRndPtInMap(10);  %gets random target.
-% botSim.setBotPos([50,70]);
-% target = [230,70];
+% botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
+% target = botSim.getRndPtInMap(10);  %gets random target.
+botSim.setBotPos([20,20]);
+target = [20,80];
+hold on;
+plot(20, 20, 'gx')
+plot(target(1), target(2), 'rx')
 
 tic %starts timer
 

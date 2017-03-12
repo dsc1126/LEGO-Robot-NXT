@@ -1,10 +1,10 @@
-function move(distance)
+function move(distance) % distance in milimeters
     % const will be determined by measurement
-    const   = 1;
-    dist    = distance*const;
+    const   = 42*pi/360; % diameter of wheel ~42mm, 360dgs~360click
+    dist    = distance/const;
     
     % motor speed
-    power = -50;
+    power = 50;
     Ports = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
     
      % create motor object with defined variables
@@ -21,7 +21,7 @@ function move(distance)
     
     % where do we want to go?
     % account for errors, i.e. if pos is not 0
-    tacholimit              = dist + pos;
+    tacholimit              = round(dist + pos);
     mStraight.TachoLimit    = tacholimit;
     
     % move

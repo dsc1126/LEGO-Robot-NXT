@@ -1,4 +1,5 @@
 function turn(angle)
+    angle               = mod(angle,360) % dont turn more than 360d
     TurningSpeed        = 50;
     if(angle<0)
         TurningSpeed    = -TurningSpeed;

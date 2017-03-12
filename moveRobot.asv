@@ -1,7 +1,7 @@
 function moveRobot(distance) % distance in milimeters
     % const will be determined by measurement
-    const   = 42*pi/360; % diameter of wheel ~42mm, 360dgs~360click
-    dist    = distance/const;
+    const   = 360/42*pi; % radius of wheel ~21mm, 360dgs~360click
+    dist    = distance*const;
     
     % motor speed
     power = 50;
@@ -21,7 +21,7 @@ function moveRobot(distance) % distance in milimeters
     
     % where do we want to go?
     % account for errors, i.e. if pos is not 0
-    tacholimit              = round(dist + pos);
+    tacholimit              = dist + pos;
     mStraight.TachoLimit    = tacholimit;
     
     % move
