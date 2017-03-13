@@ -1,4 +1,4 @@
-function [botSim] = localise(botSim,map,target)
+function [botSim] = localise(botSim,map,target,handle)
 %This function returns botSim, and accepts, botSim, a map and a target.
 %LOCALISE Template localisation function
 
@@ -8,14 +8,14 @@ modifiedMap = map; %you need to do this modification yourself
 botSim.setMap(modifiedMap);
 
 %% Key Parameters
-navigation = 1; %Set with value '1' to enable navigation, '0' to disable navigation  
+navigation = 0; %Set with value '1' to enable navigation, '0' to disable navigation  
 %real_robot = 0; %Set with value '1' to enable controlling real robot, '0' to disable controlling real robot  
-num = 500; %800; %number of particles
+num = 300; %800; %number of particles
 Min_distance = 5; %minDistance from the walls
-scans = 6; %64; %number of scans in 360 degree
+scans = 30; %64; %number of scans in 360 degree
 maxNumOfIterations = 300; %maximum number of loop
 variance = 100; %variance
-damp = 0; %0.000000001; %0.000000005; %damping factor
+damp = 0.000000001; %0.000000005; %damping factor
 MotionNoise = 0.1; %0.1;
 TurningNoise = 0.001; %(pi/30);
 %convergence_threshold = 2; %for both location and angle
@@ -54,11 +54,12 @@ stage = 0 %initialize, stage=1 if pos estimation ready, stage=2 if angle ready, 
 
 while(n < maxNumOfIterations) %%particle filter loop
     n = n+1; %increment the current number of iterations
-    %botScan = botSim.ultraScan(); %get a scan from the real robot.
-    botScan = robotUltrascan(); %get a scan from ultrasonic sensor
+    botScan2 = botSim.ultraScan(); %get a scan from the real robot.
+    botScan = robotUltrascan(scans); %get a scan from ultrasonic sensor
     
     %% Write code for updating your particles scans
-if stage == 0
+if stage == 0   
+
     for i = 1:num
         if particles(i).insideMap() ==0
         particles(i).randomPose(0);
@@ -125,7 +126,8 @@ if stage == 0
     if stdev_positions < transstd %convergence_threshold
         if stdev_angles < orientstd %convergence_threshold
         disp('convergence done');
-
+        NXT_PlayTone(800,800, handle); %plays a tone
+        NXT_PlayTone(1000,1000, handle); %plays a tone
         stage = 1
         end
     end
@@ -138,49 +140,47 @@ if stage == 0
     end 
 
     %% Write code to decide how to move next
-    [max_distance, max_index] = max(botScan);
-    [mean_distance] = mean(botScan);
-    turn_angle = (max_index-1)*2*pi/scans; %turn to the direction has maximum distance
-    move_distance = max_distance*0.7;
-    
-    if  first_move_done == 1   
-        if rand()< 0.5 %improve robustness
-            left_index=scans*1/6;%scans*1/4;
-            right_index=scans*3/6;%scans*3/4;
+%     [max_distance, max_index] = max(botScan);  
+%     turn_angle = (turn_index-1)*2*pi/scans; %turn to the direction has maximum distance
+%     move_distance = max_distance*0.5;
+
+    [move_distance, turn_angle] = firstMove(botScan,scans);
+     
+    if  first_move_done == 1
+        if rand()< 0.2 %improve robustness
+            left_index=scans*7/30;
+            right_index=scans*21/30;
             [left_distance] = botScan(left_index);
             [right_distance] = botScan(right_index);
-            if (right_distance < left_distance && left_distance > 15) %0.5 %turn left               
-                turn_angle = (left_index-1)*2*pi/scans;            
-                move_distance= left_distance*0.7;
-            elseif (left_distance < right_distance && right_distance > 15) %turn right        
+            if (right_distance < left_distance && left_distance > 15) %0.5 %turn left
+                turn_angle = (left_index-1)*2*pi/scans;
+                move_distance= left_distance*0.5;
+            elseif (left_distance < right_distance && right_distance > 15) %turn right
                 turn_angle = (right_index-1)*2*pi/scans;
-                move_distance= right_distance*0.7;
+                move_distance= right_distance*0.5;
             end
         end
         
-        if max_distance > (5 * mean_distance)
-            turn_angle = (max_index-1)*2*pi/scans; %turn to the direction has maximum distance
-            move_distance = max_distance*0.7;
-        end
     end
     first_move_done = 1;
-
-    botSim.turn(turn_angle);        
-    botSim.move(round(move_distance*10));
     
-    turn(turn_angle*180/pi); %turn the real robot
-    move(uint16(round(move_distance*10))); %move the real robot
+    botSim.turn(turn_angle);
+    botSim.move(round(move_distance));
+    
+    turn(uint16(turn_angle*180/pi)) %turn the real robot
+    moveRobot(uint16(round(move_distance*10))) %move the real robot
     
     for i =1:num %for all the particles.
-          particles(i).turn(turn_angle);
-          particles(i).move(round(move_distance*10));
+        particles(i).turn(turn_angle);
+        particles(i).move(round(move_distance));
     end
+    
 end
     
     %% Find the best orientation
 if stage == 1
 %botScan = botSim.ultraScan();
-botScan = robotUltrascan();  %get a scan from ultrasonic sensor
+botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
 
 for i=1:360
     Estimated_BotScan = Estimated_Bot.ultraScan();
@@ -362,6 +362,7 @@ GoalRegister((end_y),(end_x))=1;
 
 
 %% A-star Algorithm Function for path planning
+
 OptimalPath=ASTARPATH(start_x,start_y,inflated_grid_map,GoalRegister,Connecting_Distance);
 
 if botSim.debug()
@@ -421,18 +422,18 @@ for m = 1:(num_waypoints-1)
     turn_angle = angle-Estimated_angle;
 
     botSim.turn(turn_angle);
-    turn(turn_angle*180/pi); %turn the real robot
+    turn(uint16(turn_angle*180/pi)); %turn the real robot
     Estimated_Bot.turn(turn_angle);
     Estimated_angle = Estimated_Bot.getBotAng();
     Estimated_BotScan = Estimated_Bot.ultraScan();
     %botScan = botSim.ultraScan();
-    botScan = robotUltrascan();  %get a scan from ultrasonic sensor
+    botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
     difference = sqrt(sum((Estimated_BotScan-botScan).^2));
     
     if (botScan(1)>= distance + 3)&&(difference < 1000);
         Estimated_position = Estimated_Bot.getBotPos();
-        botSim.move(round(distance*10));
-        move(uint16(round(distance*10))); %move the real robot
+        botSim.move(round(distance));
+        moveRobot(uint16(round(distance*10))); %move the real robot
         Estimated_Bot.move(uint16(round(distance*10)));
         Estimated_position = Estimated_Bot.getBotPos();
 
@@ -463,7 +464,7 @@ for m = 1:(num_waypoints-1)
 end
 
 %botScan = botSim.ultraScan();
-botScan = robotUltrascan();  %get a scan from ultrasonic sensor
+botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
 Estimated_botScan = Estimated_Bot.ultraScan();
 
 if (Estimated_position(1)>target(1)-3 && Estimated_position(1)<target(1)+3 && Estimated_position(2)>target(2)-3 && Estimated_position(2)<target(2)+3);

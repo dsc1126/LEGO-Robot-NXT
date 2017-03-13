@@ -6,11 +6,12 @@ function turn(angle)
         
     TurningSpeed        = 50;
     if(angle<0)
-        TurningSpeed    = -TurningSpeed;
+        TurningSpeed    = -TurningSpeed; % go in opposite direction if negative angle
+        angle           = -angle;
     end
     if(angle == 0) % do nothing
     else
-        turnTicks           = int16((290/45)*(angle/2));      % assuming 45dgs turn is 290 ticks
+        turnTicks           = int16((291/45)*(angle/2));      % assuming 45dgs turn is 290 ticks
         Ports               = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
 
         mTurn1                      = NXTMotor(Ports(2)); % right motor
