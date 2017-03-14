@@ -15,7 +15,7 @@ clc
 handle = COM_OpenNXT(); %open usb port
 COM_SetDefaultNXT(handle); % set default handle
 
-Ports           = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
+% Ports           = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
 
 map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 
@@ -25,31 +25,11 @@ start_position = [90 80];
 start_angle = pi;
 botSim.setBotPos(start_position);
 botSim.setBotAng(start_angle);
-target = botSim.getRndPtInMap(10);  %gets random target.
+% target = botSim.getRndPtInMap(10);  %gets random target.
+target = [20 20];
 
 botSim.drawMap();
 drawnow;
-
-%% Parameters for path planning only
-    modifiedMap = map;
-    scans = 30;
-    inner_boundary = map;
-    Connecting_Distance = 10;
-    botSim.setMap(modifiedMap);
-    botSim.setScanConfig(botSim.generateScanConfig(scans));
-
-    Estimated_Bot = BotSim(modifiedMap);
-    Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
-    Estimated_Bot.setBotPos(start_position);
-    Estimated_Bot.setBotAng(start_angle);
-    
-    figure(1)
-    hold off; %the drawMap() function will clear the drawing when hold is off
-    botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
-    %botSim.drawBot(30,'g'); %draw robot with line length 30 and green
-    Estimated_Bot.drawBot(50, 'r');
-    drawnow;
-
 tic %starts timer
 %% Test functions
 % a = robotUltrascan(10);
@@ -95,11 +75,40 @@ tic %starts timer
 %% Path Planning
 % @input: position, angle, target, map
 % @output: pathArray, lost
-waypoints = pathPlanning(start_position, target, map, Connecting_Distance);
+
+% Testing Johans version
+path = pathPlanning2(botSim,map,target,start_position)*10
+
+% % Parameters for path planning only
+% modifiedMap = map;
+% scans = 30;
+% inner_boundary = map;
+% Connecting_Distance = 10;
+% botSim.setMap(modifiedMap);
+% botSim.setScanConfig(botSim.generateScanConfig(scans));
+% 
+% Estimated_Bot = BotSim(modifiedMap);
+% Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
+% Estimated_Bot.setBotPos(start_position);
+% Estimated_Bot.setBotAng(start_angle);
+% 
+% figure(1)
+% hold off; %the drawMap() function will clear the drawing when hold is off
+% botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
+% %botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+% Estimated_Bot.drawBot(50, 'r');
+% drawnow;
+% 
+% waypoints = pathPlanning(start_position, target, map, Connecting_Distance);
 
 %% Path Move
 % @input: currentPosition, nextPosition, currentAngle
-pathMoveError = pathMove(waypoints, Estimated_Bot, scans)
+% pathMoveError = pathMove(waypoints, Estimated_Bot, scans)
+
+angle = 0;
+for i=1:length(path)-1
+    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)]);
+end
 
 %% Clean before program exit
 COM_CloseNXT(handle); 

@@ -1,5 +1,4 @@
-function [angle] = pathMove(position, angle, target)
-%test text
+function [angle] = pathMove2(position, angle, target)
     deltaX = target(1)-position(1);
     deltaY = target(2)-position(2);
     theta=atan(abs(deltaY)/abs(deltaX));
@@ -17,3 +16,8 @@ function [angle] = pathMove(position, angle, target)
         turn(-angle+270-degrees);
         angle=270-degrees;
     end
+    move=round(sqrt((deltaX^2)+(deltaY^2)));
+    if(move>0)
+        moveRobot(move);
+    end
+end
