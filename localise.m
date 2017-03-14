@@ -410,7 +410,7 @@ for s = 2:(num_waypoints-1)
 end
 
 target_waypoints_x = waypoints((num_waypoints-w),2) - origin_x_diff;
-target_waypoints_y = waypoints((num_waypoints-w),1) - origin_x_diff;
+target_waypoints_y = waypoints((num_waypoints-w),1) - origin_y_diff;
 start_point_x = double(start_x - origin_x_diff);
 start_point_y = double(start_y - origin_y_diff);
 
@@ -434,7 +434,7 @@ for m = 1:(num_waypoints-1)
         Estimated_position = Estimated_Bot.getBotPos();
         botSim.move(round(distance));
         moveRobot(uint16(round(distance*10))); %move the real robot
-        Estimated_Bot.move(uint16(round(distance*10)));
+        Estimated_Bot.move(round(distance));
         Estimated_position = Estimated_Bot.getBotPos();
 
     else

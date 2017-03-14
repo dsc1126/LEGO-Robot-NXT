@@ -1,23 +1,47 @@
-function [angle] = pathMove(position, angle, target)
-    deltaX = target(1)-position(1);
-    deltaY = target(2)-position(2);
-    theta=atan(abs(deltaY)/abs(deltaX));
-    degrees=180*theta/pi;
-    if(deltaX>0 && deltaY>0)
-        turn(-angle+degrees);
-        angle=degrees;
-    elseif(deltaX<0 && deltaY>0)
-        turn(-angle+180-degrees);
-        angle=pi-degrees;
-    elseif(deltaX>0 && deltaY<0)
-        turn(-angle+270+degrees);
-        angle=270+degrees;
-    elseif(deltaX<0 && deltaY<0)
-        turn(-angle+180+degrees);
-        angle=180+degrees;
-    end
-    move=round(sqrt((deltaX^2)+(deltaY^2)));
-    if(move>0)
-        moveRobot(move);
+function [pathMoveError] = pathMove(waypoints, Estimated_Bot, scans, botSim) %botSim argument is optional
+pathMoveError = 0;    
+num_waypoints = numel(waypoints)/2;
+
+    for m = 1:(num_waypoints-1)  
+        angle = pi/180*atan2d(waypoints((num_waypoints-m),1)-waypoints((num_waypoints-m+1),1),waypoints((num_waypoints-m),2)-waypoints((num_waypoints-m+1),2));
+        distance = sqrt(((waypoints((num_waypoints-m),1)-waypoints((num_waypoints-m+1),1))^2)+(waypoints((num_waypoints-m),2)-waypoints((num_waypoints-m+1),2))^2);    
+
+        Estimated_angle = Estimated_Bot.getBotAng();
+        turn_angle = angle-Estimated_angle;
+
+        if nargin >= 4
+            botSim.turn(turn_angle);
+        end
+        turn(uint16(turn_angle*180/pi)); %turn the real robot
+        Estimated_Bot.turn(turn_angle);
+        Estimated_angle = Estimated_Bot.getBotAng();
+        Estimated_BotScan = Estimated_Bot.ultraScan();
+        %botScan = botSim.ultraScan();
+         botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
+         difference = sqrt(sum((Estimated_BotScan-botScan).^2));
+
+        if (botScan(1)>= distance + 3)&&(difference < 2000);
+            Estimated_position = Estimated_Bot.getBotPos();
+            if nargin >= 4
+                botSim.move(round(distance));
+            end
+            moveRobot(uint16(round(distance*10))); %move the real robot
+            Estimated_Bot.move(round(distance));
+            Estimated_position = Estimated_Bot.getBotPos();
+        else
+            pathMoveError = 1;
+            break
+        end
+
+         figure(1)
+         hold off; %the drawMap() function will clear the drawing when hold is off
+         if nargin >= 4
+             botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
+             botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+         end
+
+         Estimated_Bot.drawMap();
+         Estimated_Bot.drawBot(40, 'r');
+         drawnow;
     end
 end

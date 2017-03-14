@@ -1,14 +1,16 @@
 function turn(angle)
     angle               = mod(angle,360) % dont turn more than 360dgs
-    if((angle/180)>1)
-        angle = -(360-angle); % turn in most efficient direction
-    end
         
     TurningSpeed        = 50;
     if(angle<0)
         TurningSpeed    = -TurningSpeed; % go in opposite direction if negative angle
         angle           = -angle;
     end
+    
+    if((angle/180)>1)
+        angle = -(360-angle); % turn in most efficient direction
+    end
+    
     if(angle == 0) % do nothing
     else
         turnTicks           = int16((291/45)*(angle/2));      % assuming 45dgs turn is 290 ticks

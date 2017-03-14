@@ -1,73 +1,133 @@
-function [path] = pathPlanning(position, target, map, botSim)
-        limsMin = min(map); % minimum limits of the map
-        limsMax = max(map); % maximum limits of the map
-        if(limsMin(1)<0) %compensate for negative map start
-            target(1)=target(1)-limsMin(1);
-            position(1)=position(1)-limsMin(1);
+function [waypoints] = pathPlanning(position, target, map, Connecting_Distance)
+
+origin_x = min(map(:,1));
+origin_y = min(map(:,2));
+origin_x_diff = 1 - origin_x;
+origin_y_diff = 1 - origin_y;
+
+start_point = round(position);
+end_point = round(target);
+start_x = uint16(start_point(:,1) + origin_x_diff);
+start_y = uint16(start_point(:,2) + origin_y_diff);
+end_x = uint16(end_point(:,1) + origin_x_diff);
+end_y = uint16(end_point(:,2) + origin_y_diff);
+
+map_x_min = uint16(round(min(map(:,1),[],1)) + origin_x_diff);
+map_x_max = uint16(round(max(map(:,1),[],1)) + origin_x_diff);
+map_y_min = uint16(round(min(map(:,2),[],1)) + origin_y_diff);
+map_y_max = uint16(round(max(map(:,2),[],1)) + origin_y_diff);
+
+map_x_size = map_x_max - map_x_min +10; %+ 1;
+map_y_size = map_y_max - map_y_min +10; %+ 1;
+
+grid_map = int8(zeros(map_y_size,map_x_size)); 
+inflated_grid_map = int8(zeros(map_y_size,map_x_size)); 
+
+Num_lines = size(map(:,1),1)-1;
+
+for q = 1:Num_lines    
+    x_node = map(q,1) - map_x_min + origin_x_diff;
+    x_node_next = map(q+1,1) - map_x_min + origin_x_diff;
+    y_node = map(q,2) - map_y_min + origin_y_diff;
+    y_node_next = map(q+1,2) - map_y_min + origin_y_diff;  
+    
+    if x_node > x_node_next
+        x_high = x_node;
+        x_low = x_node_next;
+    else
+        x_high = x_node_next;
+        x_low = x_node;
+    end   
+    
+    if y_node > y_node_next
+        y_high = y_node;
+        y_low = y_node_next;
+    else
+        y_high = y_node_next;
+        y_low = y_node;
+    end
+    
+    if (y_high == y_low || x_high == x_low)
+        grid_map(y_low:y_high,x_low:x_high) = 1;
+    elseif (y_node_next>y_node && x_node_next>x_node)% || (y_node_next<y_node && x_node_next<x_node)
+        for i = 1:(x_high-x_low)    
+        grid_map(round(y_node+(y_node_next-y_node)*i/(x_node_next-x_node)),(x_node+i)) = 1;
+        end
+    elseif (y_node_next<y_node && x_node_next<x_node)
+        for i = 1:(x_high-x_low)    
+        grid_map(round(y_node-(y_node-y_node_next)*i/(x_node-x_node_next)),(x_node-i)) = 1;
         end  
-        if(limsMin(2)<0)
-            target(2)=target(2)-limsMin(2);
-            position(2)=position(2)-limsMin(2);
-        end  
-        dims = limsMax-limsMin; %dimension of the map
-        res = 0.5; %sampling resouloution in cm 
-        iterators = dims/res;
-        iterators = ceil(iterators); %to counteract 1 based indexing
-        mapArray = zeros(iterators); %preallocate for speed
-        hold on    
-        %loops through the grid indexes and tests if they are inside the map
-        for i = 1:iterators(2)
-            for j = 1:iterators(1)
-                testPos = limsMin + [j-1 i-1]*res; %to counteract 1 based indexing
-                %notice, that i and j have also been swapped here so that the only
-                %thing left to do is invert the y axis.
-                mapArray(i,j) = botSim.pointInsideMap(testPos);
-            end
-        end
-        mapArray=flipud(mapArray); %inverts y axis
-        a=size(mapArray);
-        for i=1:a(1) %binary flip 1 to 0 etc
-            for j=1:a(2)
-                if(mapArray(i,j)==0)
-                    mapArray(i,j)=1;
-                else
-                    mapArray(i,j)=0;
-                end
-            end
-        end   
-        tmpMap = robotics.BinaryOccupancyGrid(mapArray, 2); %get a Occupancy Grid for path planning
-        robotRadius = 1; %simulated value, not to go too close to edge
-        mapInflated = copy(tmpMap);
-        inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission 
-        prm = robotics.PRM; %define path planner
-        prm.Map = mapInflated;
-        prm.NumNodes = 300; %nr of nodes for path planning
-        if(limsMax(1)>200 || limsMax(2)>200)
-            prm.NumNodes = 500; %if the map is big
-        end
-        prm.ConnectionDistance = 250; %max distance between nodes
-        startLocation = position;
-        endLocation = target;
-        path = findpath(prm, startLocation, endLocation); %path planning
-        while isempty(path)
-            prm.NumNodes = prm.NumNodes + 10; % No feasible path found yet, increase the number of nodes
-            
-            update(prm); %Use the |update| function to re-create the PRM roadmap with the changed attribute
-            
-            path = findpath(prm, startLocation, endLocation); % Search for a feasible path with the updated PRM
-        end
-        if(limsMin(1)<0) %compensate back for negative map start
-            for i = 1:length(path)
-                path(i,1)=path(i,1)+limsMin(1);
-            end
-            target(1)=target(1)+limsMin(1);
-        end
-        if(limsMin(2)<0)
-            for i = 1:length(path)
-                path(i,2)=path(i,2)+limsMin(2);
-            end
-            target(1)=target(1)+limsMin(1);
-        end
+    elseif (y_node_next>y_node && x_node_next<x_node)
+        for i = 1:(x_high-x_low)
+        grid_map(round(y_node+(y_node_next-y_node)*i/(x_node_next-x_node)),x_node-i) = 1;
+        end    
+    elseif (y_node_next<y_node && x_node_next>x_node)
+        for i = 1:(x_high-x_low)
+        grid_map(round(y_node-(y_node-y_node_next)*i/(x_node_next-x_node)),x_node+i) = 1;
+        end    
+    end   
 end
 
+for m = 6:(map_x_size-5)
+ 	for n = 6:(map_y_size-5)
+    	if grid_map(n,m)==1
+             inflated_grid_map(n-1,m-1)=1;
+             inflated_grid_map(n-1,m+1)=1;
+             inflated_grid_map(n+1,m-1)=1;
+             inflated_grid_map(n+1,m+1)=1;
+             
+             inflated_grid_map(n-2,m-2)=1;
+             inflated_grid_map(n-2,m+2)=1;
+             inflated_grid_map(n+2,m-2)=1;
+             inflated_grid_map(n+2,m+2)=1;
+             
+             inflated_grid_map(n-3,m-3)=1;
+             inflated_grid_map(n-3,m+3)=1;
+             inflated_grid_map(n+3,m-3)=1;
+             inflated_grid_map(n+3,m+3)=1;
+             
+             inflated_grid_map(n-4,m-4)=1;
+             inflated_grid_map(n-4,m+4)=1;
+             inflated_grid_map(n+4,m-4)=1;
+             inflated_grid_map(n+4,m+4)=1;
+             
+             inflated_grid_map(n-5,m-5)=1;
+             inflated_grid_map(n-5,m+5)=1;
+             inflated_grid_map(n+5,m-5)=1;
+             inflated_grid_map(n+5,m+5)=1;
+        end
+    end
+end
+ 
+GoalRegister=int8(zeros(map_y_size,map_x_size));
+GoalRegister((end_y),(end_x))=1;
 
+
+%% A-star Algorithm Function for path planning
+
+OptimalPath=ASTARPATH(start_x,start_y,inflated_grid_map,GoalRegister,Connecting_Distance);
+
+if size(OptimalPath,2)>1
+    figure(9)
+    imagesc((inflated_grid_map))
+    %imagesc((grid_map))
+    colormap(flipud(gray));
+
+    hold on
+    plot(OptimalPath(1,2),OptimalPath(1,1),'o','color','k')
+    plot(OptimalPath(end,2),OptimalPath(end,1),'o','color','b')
+    plot(OptimalPath(:,2),OptimalPath(:,1),'r')
+    legend('Path','Goal','Start') %legend('Goal','Start','Path')
+else 
+    pause(1);
+    h=msgbox('No path exists to the Target!','warn');
+    uiwait(h,5);
+end
+
+%waypoints = OptimalPath - origin_x_diff;
+waypoints = [(OptimalPath(:,1)-origin_y_diff),(OptimalPath(:,2)-origin_x_diff)];
+
+target_waypoints_x = waypoints(1,2);
+target_waypoints_y = waypoints(1,1);
+
+end
