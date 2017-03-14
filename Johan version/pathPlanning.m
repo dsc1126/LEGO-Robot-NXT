@@ -1,4 +1,5 @@
 function [path] = pathPlanning(botSim,modifiedMap,target,position,angle)
+%test text
         limsMin = min(modifiedMap); % minimum limits of the map
         limsMax = max(modifiedMap); % maximum limits of the map
         if(limsMin(1)<0) %compensate for negative map start
