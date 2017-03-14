@@ -21,14 +21,34 @@ map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 
 botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
-botSim.setBotPos([90 80]);
-botSim.setBotAng(pi);
+start_position = [90 80];
+start_angle = pi;
+botSim.setBotPos(start_position);
+botSim.setBotAng(start_angle);
 target = botSim.getRndPtInMap(10);  %gets random target.
 
 botSim.drawMap();
 drawnow;
 
+%% Parameters for path planning only
+    modifiedMap = map;
+    scans = 30;
+    inner_boundary = map;
+    Connecting_Distance = 10;
+    botSim.setMap(modifiedMap);
+    botSim.setScanConfig(botSim.generateScanConfig(scans));
 
+    Estimated_Bot = BotSim(modifiedMap);
+    Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
+    Estimated_Bot.setBotPos(start_position);
+    Estimated_Bot.setBotAng(start_angle);
+    
+    figure(1)
+    hold off; %the drawMap() function will clear the drawing when hold is off
+    botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
+    %botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+    Estimated_Bot.drawBot(50, 'r');
+    drawnow;
 
 tic %starts timer
 %% Test functions
@@ -62,26 +82,24 @@ tic %starts timer
 % [botSim, Estimated_Bot] = PFL(botSim, map,500, 30);
 % disp(Estimated_Bot.getBotPos())
 % 
-returnedBot = localise(botSim,map,target,handle); %Where the magic happens
-
-resultsTime = toc %stops timer
-
-%calculated how far away your robot is from the target.
-resultsDis =  distance(target, returnedBot.getBotPos())
- 
-robot_position = returnedBot.getBotPos()
-robot_angle = rem(returnedBot.getBotAng(),6.28319)
+% returnedBot = localise(botSim,map,target,handle); %Where the magic happens
+% 
+% resultsTime = toc %stops timer
+% 
+% %calculated how far away your robot is from the target.
+% resultsDis =  distance(target, returnedBot.getBotPos())
+%  
+% robot_position = returnedBot.getBotPos()
+% robot_angle = rem(returnedBot.getBotAng(),6.28319)
 
 %% Path Planning
-% @input: position, target, map
+% @input: position, angle, target, map
 % @output: pathArray, lost
-
-
+waypoints = pathPlanning(start_position, target, map, Connecting_Distance);
 
 %% Path Move
 % @input: currentPosition, nextPosition, currentAngle
-
-
+pathMoveError = pathMove(waypoints, Estimated_Bot, scans)
 
 %% Clean before program exit
 COM_CloseNXT(handle); 
