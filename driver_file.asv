@@ -22,7 +22,7 @@ map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
 start_position = [80 80];
-start_angle = 0;
+start_angle = pi;
 botSim.setBotPos(start_position);
 botSim.setBotAng(start_angle);
 % target = botSim.getRndPtInMap(10);  %gets random target.
@@ -116,20 +116,14 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 %     plot(waypoints(i,1),waypoints(i,2),'x')
 % end
 % path=flipud(waypoints(:,1:2));
-
-
-for i=1:length(path)
-    plot(path(i,1)/10,path(i,2)/10,'x')
-end
-botSim.drawMap();
-drawnow;
-hold on
-angle = 0;
-debug=1;
-botSim.setBotPos([path(1,1)/10,path(1,2)/10])
+% angle = 0;
+botSim.setBotPos([path(1,1),path(1,2)])
 botSim.drawBot(10);
 for i=1:length(path)-1
-    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)],botSim,debug);
+    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)]);
+    botSim.setBotPos([path(i+1,1),path(i+1,2)])
+    botSim.setBotAng(angle*pi/180);
+    botSim.drawBot(10);
 end
 %% Done!
 NXT_PlayTone(1200,100, handle); %plays a tone

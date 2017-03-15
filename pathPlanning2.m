@@ -36,7 +36,7 @@ function [path] = pathPlanning2(botSim,modifiedMap,target,position)
         end
     end
     tmpMap = robotics.BinaryOccupancyGrid(mapArray, 2); %get a Occupancy Grid for path planning
-    robotRadius = 1; %simulated value, not to go too close to edge
+    robotRadius = 15; %not to go too close to edge
     mapInflated = copy(tmpMap);
     inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission
     prm = robotics.PRM; %define path planner
