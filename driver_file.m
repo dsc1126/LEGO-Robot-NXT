@@ -21,7 +21,7 @@ map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 
 botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
-start_position = [20 20];
+start_position = [40 20];
 start_angle = 0;
 botSim.setBotPos(start_position);
 botSim.setBotAng(start_angle);
@@ -32,13 +32,14 @@ botSim.drawMap();
 drawnow;
 tic %starts timer
 %% Test functions
-% a = robotUltrascan(10);
+% ass = robotUltrascan(10);
 % b=1;
 % moveRobot(600);
 % turn(180);
-% for i=1:2
+% for i=1:8
 % %     moveRobot(200);
-%     turn(-180);
+% %     turn(-180);
+%     ass = robotUltrascan(10);
 % end
 % % botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.drawMap();
@@ -122,15 +123,17 @@ path0 = pathPlanning2(botSim,map,target,start_position)*10
 for i=1:length(path0)
     plot(path0(i,1)/10,path0(i,2)/10,'x')
 end
+
+figure
 path=optimisePath(path0);
-for i=1:length(path)
-    plot(path(i,1)/10,path(i,2)/10,'x')
-end
 botSim.drawMap();
 drawnow;
 hold on
+for i=1:length(path)
+    plot(path(i,1)/10,path(i,2)/10,'x')
+end
 angle = 0;
-debug=1;
+debug=1;      
 botSim.setBotPos([path(1,1)/10,path(1,2)/10])
 botSim.drawBot(10);
 for i=1:length(path)-1

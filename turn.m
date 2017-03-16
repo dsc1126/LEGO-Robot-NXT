@@ -5,7 +5,7 @@ function turn(angle)
            angle        = -mod(abs(angle),360) % dont turn more than 360dgs
     end
     
-    TurningSpeed        = 50;
+    TurningSpeed        = 90;
     if(angle<0)
         TurningSpeed    = -TurningSpeed; % go in opposite direction if negative angle
         angle           = -angle;
