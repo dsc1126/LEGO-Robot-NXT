@@ -17,15 +17,15 @@ num_waypoints = numel(waypoints)/2;
         Estimated_angle = Estimated_Bot.getBotAng();
         Estimated_BotScan = Estimated_Bot.ultraScan();
         %botScan = botSim.ultraScan();
-         botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
-         difference = sqrt(sum((Estimated_BotScan-botScan).^2));
+         botScan = robotUltrascan(1);  %get a scan from ultrasonic sensor
+         difference = sqrt(sum((Estimated_BotScan(1)-botScan(1)).^2));
 
         if (botScan(1)>= distance + 3)&&(difference < 2000);
             Estimated_position = Estimated_Bot.getBotPos();
             if nargin >= 4
                 botSim.move(round(distance));
             end
-            moveRobot(uint16(round(distance*10))); %move the real robot
+            moveRobot(uint16(round(distance))); %move the real robot
             Estimated_Bot.move(round(distance));
             Estimated_position = Estimated_Bot.getBotPos();
         else
