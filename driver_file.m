@@ -21,24 +21,25 @@ map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 
 botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
-start_position = [90 80];
-start_angle = pi;
+start_position = [40 20];
+start_angle = 0;
 botSim.setBotPos(start_position);
 botSim.setBotAng(start_angle);
 % target = botSim.getRndPtInMap(10);  %gets random target.
-target = [20 20];
+target = [80 80];
 
 botSim.drawMap();
 drawnow;
 tic %starts timer
 %% Test functions
-% a = robotUltrascan(10);
+% ass = robotUltrascan(10);
 % b=1;
-% moveRobot(660);
-% turn(90);
-% for i=1:1
-% %     moveRobot(100);
-%     turn(90);
+% moveRobot(600);
+% turn(180);
+% for i=1:8
+% %     moveRobot(200);
+% %     turn(-180);
+%     ass = robotUltrascan(10);
 % end
 % % botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.drawMap();
@@ -77,13 +78,13 @@ tic %starts timer
 % @output: pathArray, lost
 
 % Testing Johans version
-path = pathPlanning2(botSim,map,target,start_position)*10
+path0 = pathPlanning2(botSim,map,target,start_position)*10
 
-% % Parameters for path planning only
+% Parameters for path planning only
 % modifiedMap = map;
 % scans = 30;
 % inner_boundary = map;
-% Connecting_Distance = 10;
+% Connecting_Distance = 100;
 % botSim.setMap(modifiedMap);
 % botSim.setScanConfig(botSim.generateScanConfig(scans));
 % 
@@ -95,7 +96,7 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 % figure(1)
 % hold off; %the drawMap() function will clear the drawing when hold is off
 % botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
-% %botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+% botSim.drawBot(30,'g'); %draw robot with line length 30 and green
 % Estimated_Bot.drawBot(50, 'r');
 % drawnow;
 % 
@@ -103,12 +104,45 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 
 %% Path Move
 % @input: currentPosition, nextPosition, currentAngle
-% pathMoveError = pathMove(waypoints, Estimated_Bot, scans)
+% pathMoveError = pathMove(waypoints, Estimated_Bot, scans);
 
-angle = 0;
-for i=1:length(path)-1
-    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)]);
+% aries path plan with johans path move
+% hold on
+% mtx=zeros(size(waypoints));
+% mtx(:,1)=waypoints(:,2)
+% mtx(:,2)=waypoints(:,1)
+% waypoints=mtx;
+% plot(waypoints(1,1),waypoints(1,2),'bo')
+% for i=1:length(waypoints)
+%     plot(waypoints(i,1),waypoints(i,2),'x')
+% end
+% path=flipud(waypoints(:,1:2))*10;
+
+
+%testing johans path move
+for i=1:length(path0)
+    plot(path0(i,1)/10,path0(i,2)/10,'x')
 end
+
+figure
+path=optimisePath(path0);
+botSim.drawMap();
+drawnow;
+hold on
+for i=1:length(path)
+    plot(path(i,1)/10,path(i,2)/10,'x')
+end
+angle = 0;
+debug=1;      
+botSim.setBotPos([path(1,1)/10,path(1,2)/10])
+botSim.drawBot(10);
+for i=1:length(path)-1
+    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)],botSim,debug);
+end
+%% Done!
+NXT_PlayTone(1200,100, handle); %plays a tone
+NXT_PlayTone(800,800, handle); %plays a tone
+toc
 
 %% Clean before program exit
 COM_CloseNXT(handle); 

@@ -39,14 +39,11 @@ function [path] = pathPlanning2(botSim,modifiedMap,target,position)
     % ONES
     tmpMap = robotics.BinaryOccupancyGrid(mapArray, 2); %get a Occupancy Grid for path planning
     robotRadius = 15; %not to go too close to edge
-    
     mapInflated = copy(tmpMap); % remove for manual inflation
-    inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission
-   
+    inflate(mapInflated,17,'grid'); % remove for manual inflation
+%     inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission
     prm = robotics.PRM; %define path planner
-    
-    prm.Map = mapInflated; % change for manual inflation
-    
+    prm.Map = mapInflated; % change for manual infla
     prm.NumNodes = 300; %nr of nodes for path planning
     if(limsMax(1)>200 || limsMax(2)>200)
         prm.NumNodes = 500; %if the map is big

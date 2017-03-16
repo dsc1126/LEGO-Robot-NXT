@@ -12,7 +12,7 @@ num_waypoints = numel(waypoints)/2;
         if nargin >= 4
             botSim.turn(turn_angle);
         end
-        turn(uint16(turn_angle*180/pi)); %turn the real robot
+        turn(int16(turn_angle*180/pi)); %turn the real robot
         Estimated_Bot.turn(turn_angle);
         Estimated_angle = Estimated_Bot.getBotAng();
         Estimated_BotScan = Estimated_Bot.ultraScan();

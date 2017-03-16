@@ -20,10 +20,10 @@ function [scanValues] = robotUltrascan(scans)
         mScan.ActionAtTachoLimit    = 'Brake';
         
         % where are we?
-%         mScan.ResetPosition();
-%         data                = mScan.ReadFromNXT();
-%         pos                 = data.Position;
-        mScan.TachoLimit      = round(360/nrScans);
+        mScan.ResetPosition();
+        data                = mScan.ReadFromNXT();
+        pos                 = data.Position;
+        mScan.TachoLimit      = round((360/nrScans)+pos);
         
         % move
         mScan.SendToNXT();
@@ -32,7 +32,12 @@ function [scanValues] = robotUltrascan(scans)
     
     % move back
     mScan.Power                 = -power;
-    mScan.TachoLimit            = 360;
+    % where are we?
+    mScan.ResetPosition();
+    data                = mScan.ReadFromNXT();
+    pos                 = data.Position;
+    mScan.TachoLimit      = round(360+pos);
+%     mScan.TachoLimit            = 360;
     mScan.SendToNXT();
     mScan.WaitFor();
 
