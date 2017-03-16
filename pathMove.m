@@ -4,11 +4,11 @@ num_waypoints = numel(waypoints)/2;
 
     for m = 1:(num_waypoints-1)  
         angle = pi/180*atan2d(waypoints((num_waypoints-m),1)-waypoints((num_waypoints-m+1),1),waypoints((num_waypoints-m),2)-waypoints((num_waypoints-m+1),2));
-        distance = sqrt(((waypoints((num_waypoints-m),1)-waypoints((num_waypoints-m+1),1))^2)+(waypoints((num_waypoints-m),2)-waypoints((num_waypoints-m+1),2))^2);    
+        distance = sqrt(((waypoints((num_waypoints-m),1)-waypoints((num_waypoints-m+1),1))^2)+(waypoints((num_waypoints-m),2)-waypoints((num_waypoints-m+1),2))^2)   
 
-        Estimated_angle = Estimated_Bot.getBotAng();
-        turn_angle = angle-Estimated_angle;
-
+        Estimated_angle = Estimated_Bot.getBotAng()
+        turn_angle = angle-Estimated_angle
+        
         if nargin >= 4
             botSim.turn(turn_angle);
         end
@@ -17,21 +17,24 @@ num_waypoints = numel(waypoints)/2;
         Estimated_angle = Estimated_Bot.getBotAng();
         Estimated_BotScan = Estimated_Bot.ultraScan();
         %botScan = botSim.ultraScan();
-         botScan = robotUltrascan(1);  %get a scan from ultrasonic sensor
-         difference = sqrt(sum((Estimated_BotScan(1)-botScan(1)).^2));
+         OpenUltrasonic(SENSOR_4);
+         botScan = GetUltrasonic(SENSOR_4); %robotUltrascan(1);  %get a scan from ultrasonic sensor
+         CloseSensor(SENSOR_4);
+        
+%          difference = sqrt(sum((Estimated_BotScan(1)-botScan(1)).^2))
 
-        if (botScan(1)>= distance + 3)&&(difference < 2000);
+%         if (botScan(1)>= distance*0.1)&&(difference < 2000);
             Estimated_position = Estimated_Bot.getBotPos();
             if nargin >= 4
                 botSim.move(round(distance));
             end
-            moveRobot(uint16(round(distance))); %move the real robot
+            moveRobot(uint16(round(distance*10))); %move the real robot
             Estimated_Bot.move(round(distance));
             Estimated_position = Estimated_Bot.getBotPos();
-        else
-            pathMoveError = 1;
-            break
-        end
+%         else
+%             pathMoveError = 1;
+%             break
+%         end
 
          figure(1)
          hold off; %the drawMap() function will clear the drawing when hold is off
