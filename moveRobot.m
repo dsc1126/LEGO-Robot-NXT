@@ -1,7 +1,7 @@
 function moveRobot(distance) % distance in milimeters
     % const will be determined by measurement
     const   = 42*pi/360; % diameter of wheel ~42mm, 360dgs~360click
-    dist    = distance/const;
+    dist    = 1.115*distance/const;
     
     % motor speed
     power = 50;

@@ -33,10 +33,44 @@ function [angle] = pathMove2(position, angle, target, botSim, debug)
             botSim.drawBot(10,'r');
         end
         angle=270-degrees;
+        
+    elseif(deltaX==0 && deltaY>0)
+        degrees=90;
+        turn(-angle+degrees);
+        if(debug==1)
+            botSim.turn((-angle+degrees)*pi/180);
+            botSim.drawBot(10,'r');
+        end
+        angle=degrees;
+    elseif(deltaX==0 && deltaY<0)
+        degrees=270;
+        turn(-angle+degrees);
+        if(debug==1)
+            botSim.turn((-angle+degrees)*pi/180);
+            botSim.drawBot(10,'r');
+        end
+        angle=degrees;
+    elseif(deltaX>0 && deltaY==0)
+        degrees=0;
+        turn(-angle+degrees);
+        if(debug==1)
+            botSim.turn((-angle+degrees)*pi/180);
+            botSim.drawBot(10,'r');
+        end
+        angle=degrees;
+    elseif(deltaX<0 && deltaY==0)
+        degrees=180;
+        turn(-angle+degrees);
+        if(debug==1)
+            botSim.turn((-angle+degrees)*pi/180);
+            botSim.drawBot(10,'r');
+        end
+        angle=degrees;
     end
+    
     move=round(sqrt((deltaX^2)+(deltaY^2)));
     if(move>0)
-        moveRobot(move*1.2); %scaling
+        moveRobot(move);
         if(debug==1)
             botSim.move(move/10);
             botSim.drawBot(10);

@@ -17,8 +17,8 @@ num_waypoints = numel(waypoints)/2;
         Estimated_angle = Estimated_Bot.getBotAng();
         Estimated_BotScan = Estimated_Bot.ultraScan();
         %botScan = botSim.ultraScan();
-         botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
-         difference = sqrt(sum((Estimated_BotScan-botScan).^2));
+         botScan = robotUltrascan(1);  %get a scan from ultrasonic sensor
+         difference = sqrt(sum((Estimated_BotScan(1)-botScan(1)).^2));
 
         if (botScan(1)>= distance + 3)&&(difference < 2000);
             Estimated_position = Estimated_Bot.getBotPos();

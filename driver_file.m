@@ -21,12 +21,12 @@ map=[0,0;60,0;60,45;45,45;45,59;106,59;106,105;0,105];  %default map
 
 botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.randomPose(10); %puts the robot in a random position at least 10cm away from a wall
-start_position = [80 80];
+start_position = [20 20];
 start_angle = 0;
 botSim.setBotPos(start_position);
 botSim.setBotAng(start_angle);
 % target = botSim.getRndPtInMap(10);  %gets random target.
-target = [20 20];
+target = [80 80];
 
 botSim.drawMap();
 drawnow;
@@ -34,11 +34,11 @@ tic %starts timer
 %% Test functions
 % a = robotUltrascan(10);
 % b=1;
-% moveRobot(660);
-% turn(90);
-% for i=1:1
-% %     moveRobot(100);
-%     turn(90);
+% moveRobot(600);
+% turn(180);
+% for i=1:2
+% %     moveRobot(200);
+%     turn(-180);
 % end
 % % botSim = BotSim(map,[0,0,0]);  %sets up a botSim object a map, and debug mode on.
 % botSim.drawMap();
@@ -76,8 +76,8 @@ tic %starts timer
 % @input: position, angle, target, map
 % @output: pathArray, lost
 
-% % Testing Johans version
-path = pathPlanning2(botSim,map,target,start_position)*10
+% Testing Johans version
+path0 = pathPlanning2(botSim,map,target,start_position)*10
 
 % Parameters for path planning only
 % modifiedMap = map;
@@ -95,7 +95,7 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 % figure(1)
 % hold off; %the drawMap() function will clear the drawing when hold is off
 % botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
-% %botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+% botSim.drawBot(30,'g'); %draw robot with line length 30 and green
 % Estimated_Bot.drawBot(50, 'r');
 % drawnow;
 % 
@@ -103,9 +103,9 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 
 %% Path Move
 % @input: currentPosition, nextPosition, currentAngle
-% pathMoveError = pathMove(waypoints, Estimated_Bot, scans)
+% pathMoveError = pathMove(waypoints, Estimated_Bot, scans);
 
-%testing johans path plan
+% aries path plan with johans path move
 % hold on
 % mtx=zeros(size(waypoints));
 % mtx(:,1)=waypoints(:,2)
@@ -115,9 +115,14 @@ path = pathPlanning2(botSim,map,target,start_position)*10
 % for i=1:length(waypoints)
 %     plot(waypoints(i,1),waypoints(i,2),'x')
 % end
-% path=flipud(waypoints(:,1:2));
+% path=flipud(waypoints(:,1:2))*10;
 
 
+%testing johans path move
+for i=1:length(path0)
+    plot(path0(i,1)/10,path0(i,2)/10,'x')
+end
+path=optimisePath(path0);
 for i=1:length(path)
     plot(path(i,1)/10,path(i,2)/10,'x')
 end
