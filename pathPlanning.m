@@ -68,33 +68,15 @@ for q = 1:Num_lines
     end   
 end
 
-for m = 6:(map_x_size-5)
- 	for n = 6:(map_y_size-5)
+for m = 16:(map_x_size-15)
+ 	for n = 16:(map_y_size-15)
     	if grid_map(n,m)==1
-             inflated_grid_map(n-1,m-1)=1;
-             inflated_grid_map(n-1,m+1)=1;
-             inflated_grid_map(n+1,m-1)=1;
-             inflated_grid_map(n+1,m+1)=1;
-             
-             inflated_grid_map(n-2,m-2)=1;
-             inflated_grid_map(n-2,m+2)=1;
-             inflated_grid_map(n+2,m-2)=1;
-             inflated_grid_map(n+2,m+2)=1;
-             
-             inflated_grid_map(n-3,m-3)=1;
-             inflated_grid_map(n-3,m+3)=1;
-             inflated_grid_map(n+3,m-3)=1;
-             inflated_grid_map(n+3,m+3)=1;
-             
-             inflated_grid_map(n-4,m-4)=1;
-             inflated_grid_map(n-4,m+4)=1;
-             inflated_grid_map(n+4,m-4)=1;
-             inflated_grid_map(n+4,m+4)=1;
-             
-             inflated_grid_map(n-5,m-5)=1;
-             inflated_grid_map(n-5,m+5)=1;
-             inflated_grid_map(n+5,m-5)=1;
-             inflated_grid_map(n+5,m+5)=1;
+            for p = 1:15
+             inflated_grid_map(n-p,m-p)=1;
+             inflated_grid_map(n-p,m+p)=1;
+             inflated_grid_map(n+p,m-p)=1;
+             inflated_grid_map(n+p,m+p)=1;
+            end          
         end
     end
 end
