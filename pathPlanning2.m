@@ -37,6 +37,19 @@ function [path] = pathPlanning2(botSim,modifiedMap,target,position)
     end
     % TO INFLATE MAP USE mapArray AND MANIPULATE ZEROS IN NEIGBHORHOOD OF
     % ONES
+    mapInflated = mapArray;
+    for m = 16:(iterators(2)-15)
+        for n = 16:(iterators(1)-15)
+            if mapInflated(n,m)==1
+                for p = 1:15
+                 mapInflated(n-p,m-p)=1;
+                 mapInflated(n-p,m+p)=1;
+                 mapInflated(n+p,m-p)=1;
+                 mapInflated(n+p,m+p)=1;
+                end          
+            end
+        end
+    end
     tmpMap = robotics.BinaryOccupancyGrid(mapArray, 2); %get a Occupancy Grid for path planning
     robotRadius = 15; %not to go too close to edge
     
