@@ -1,4 +1,4 @@
-function [optimisedPath] = optimisePath(path)
+function [optimisedPath] = optimisePath(path) % remove points too close together
 if(length(path)>2)
     threshold = 100;
     index = 1;
