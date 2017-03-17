@@ -78,7 +78,8 @@ tic %starts timer
 % @output: pathArray, lost
 
 % Testing Johans version
-path0 = pathPlanning2(botSim,map,target,start_position)*10
+inflated_boundaries = boundary_inflation(map, 10); % alternative inflation function
+path0 = pathPlanning2(botSim,inflated_boundaries,target,start_position)*10
 
 % Parameters for path planning only
 % modifiedMap = map;

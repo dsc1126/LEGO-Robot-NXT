@@ -37,30 +37,30 @@ function [path] = pathPlanning2(botSim,modifiedMap,target,position)
     % TO INFLATE MAP USE mapArray AND MANIPULATE ZEROS IN NEIGBHORHOOD OF
     % ONES
     mapInflated = mapArray;
-%     for m = 16:(iterators(2)-15)
-%         for n = 16:(iterators(1)-15)
-%             if mapInflated(n,m)==1
-%                 for p = 1:15
-%                  mapInflated(n-p,m-p)=1;
-%                  mapInflated(n-p,m+p)=1;
-%                  mapInflated(n+p,m-p)=1;
-%                  mapInflated(n+p,m+p)=1;
-%                 end          
-%             end
-%         end
-%     end
+    for m = 16:(iterators(2)-15)
+        for n = 16:(iterators(1)-15)
+            if mapInflated(n,m)==1
+                for p = 1:15
+                 mapInflated(n-p,m-p)=1;
+                 mapInflated(n-p,m+p)=1;
+                 mapInflated(n+p,m-p)=1;
+                 mapInflated(n+p,m+p)=1;
+                end          
+            end
+        end
+    end
     tmpMap = robotics.BinaryOccupancyGrid(mapArray, 2); %get a Occupancy Grid for path planning
     robotRadius = 15; %not to go too close to edge
     
     mapInflated = copy(tmpMap); % remove for manual inflation
-    %inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission
+    inflate(mapInflated,robotRadius); %inflates boundaries to avoid collission
    
     prm = robotics.PRM; %define path planner
     
     prm.Map = mapInflated; % change for manual inflation
     
     prm.NumNodes = 300; %nr of nodes for path planning
-        if(limsMax(1)>200 || limsMax(2)>200)
+    if(limsMax(1)>200 || limsMax(2)>200)
         prm.NumNodes = 500; %if the map is big
     end
     prm.ConnectionDistance = 200; %max distance between nodes
