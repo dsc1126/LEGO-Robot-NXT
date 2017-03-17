@@ -1,6 +1,6 @@
 function [optimisedPath] = optimisePath(path) % remove points too close together
 if(length(path)>2)
-    threshold = 10;%100
+    threshold = 20;%100
     total_distance = sqrt((path(length(path),1)-path(1,1))^2+(path(length(path),1)-path(1,1))^2);
     if threshold <= total_distance % check if thresthod is less than total distance to target
         index = 1;

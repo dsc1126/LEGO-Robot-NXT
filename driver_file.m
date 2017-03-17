@@ -78,34 +78,51 @@ tic %starts timer
 % @output: pathArray, lost
 
 % Testing Johans version
-inflated_boundaries = boundary_inflation(map, 10); % alternative inflation function
-path0 = pathPlanning2(botSim,inflated_boundaries,target,start_position)*10
+% path0 = pathPlanning2(botSim,map,target,start_position)*10
 
 % Parameters for path planning only
-% modifiedMap = map;
-% scans = 30;
-% inner_boundary = map;
-% Connecting_Distance = 100;
-% botSim.setMap(modifiedMap);
-% botSim.setScanConfig(botSim.generateScanConfig(scans));
-% 
-% Estimated_Bot = BotSim(modifiedMap);
-% Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
-% Estimated_Bot.setBotPos(start_position);
-% Estimated_Bot.setBotAng(start_angle);
-% 
-% figure(1)
-% hold off; %the drawMap() function will clear the drawing when hold is off
-% botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
-% botSim.drawBot(30,'g'); %draw robot with line length 30 and green
-% Estimated_Bot.drawBot(50, 'r');
-% drawnow;
-% 
-% waypoints = pathPlanning(start_position, target, map, Connecting_Distance);
+modifiedMap = map;
+scans = 30;
+inner_boundary = map;
+Connecting_Distance = 20;
+botSim.setMap(modifiedMap);
+botSim.setScanConfig(botSim.generateScanConfig(scans));
 
+Estimated_Bot = BotSim(modifiedMap);
+Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
+Estimated_Bot.setBotPos(start_position);
+Estimated_Bot.setBotAng(start_angle);
+
+figure(1)
+hold off; %the drawMap() function will clear the drawing when hold is off
+botSim.drawMap(); %drawMap() turns hold back on again, so you can draw the bots
+botSim.drawBot(30,'g'); %draw robot with line length 30 and green
+Estimated_Bot.drawBot(50, 'r');
+drawnow;
+
+%waypoints = pathPlanning(start_position, target, map, Connecting_Distance)
+inflated_boundaries = boundary_inflation(map, 15);
+waypoints = pathfinder(start_position, target, inflated_boundaries);
+botSim.setMap(inflated_boundaries);
+botSim.drawMap();
+drawnow;
+for i=1:length(waypoints)
+    plot(waypoints(i,1),waypoints(i,2),'x')
+end
+waypoints = waypoints * 10;
+%waypoints = flipud(waypoints);
+%optimisedPath = optimisePath(waypoints)
+%%path move testing
+angle = 0;
+debug=1;      
+botSim.setBotPos([waypoints(1,1)/10,waypoints(1,2)/10])
+botSim.drawBot(10);
+for i=1:length(waypoints)-1
+    angle = pathMove2([waypoints(i,1),waypoints(i,2)], angle, [waypoints(i+1,1),waypoints(i+1,2)],botSim,debug);
+end
 %% Path Move
 % @input: currentPosition, nextPosition, currentAngle
-% pathMoveError = pathMove(waypoints, Estimated_Bot, scans);
+%pathMoveError = pathMove(optimisedPath, Estimated_Bot, scans);
 
 % aries path plan with johans path move
 % hold on
@@ -121,25 +138,25 @@ path0 = pathPlanning2(botSim,inflated_boundaries,target,start_position)*10
 
 
 %testing johans path move
-for i=1:length(path0)
-    plot(path0(i,1)/10,path0(i,2)/10,'x')
-end
-
-figure
-path=optimisePath(path0);
-botSim.drawMap();
-drawnow;
-hold on
-for i=1:length(path)
-    plot(path(i,1)/10,path(i,2)/10,'x')
-end
-angle = 0;
-debug=1;      
-botSim.setBotPos([path(1,1)/10,path(1,2)/10])
-botSim.drawBot(10);
-for i=1:length(path)-1
-    angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)],botSim,debug);
-end
+% for i=1:length(path0)
+%     plot(path0(i,1)/10,path0(i,2)/10,'x')
+% end
+% 
+% figure
+% path=optimisePath(path0);
+% botSim.drawMap();
+% drawnow;
+% hold on
+% for i=1:length(path)
+%     plot(path(i,1)/10,path(i,2)/10,'x')
+% end
+% angle = 0;
+% debug=1;      
+% botSim.setBotPos([path(1,1)/10,path(1,2)/10])
+% botSim.drawBot(10);
+% for i=1:length(path)-1
+%     angle = pathMove2([path(i,1),path(i,2)], angle, [path(i+1,1),path(i+1,2)],botSim,debug);
+% end
 %% Done!
 NXT_PlayTone(1200,100, handle); %plays a tone
 NXT_PlayTone(800,800, handle); %plays a tone
