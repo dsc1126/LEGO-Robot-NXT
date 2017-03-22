@@ -15,10 +15,9 @@ function turn(angle)
         angle = 360-angle; % turn in most efficient direction
         TurningSpeed    = -TurningSpeed; % go in opposite direction if negative angle
     end
-    
-    if(angle == 0) % do nothing
+    turnTicks           = abs(int16((290/45)*(angle/2)));      % assuming 45dgs turn is 290 ticks
+    if(turnTicks == 0) % do nothing
     else
-        turnTicks           = abs(int16((303/45)*(angle/2)));      % assuming 45dgs turn is 290 ticks
         Ports               = [MOTOR_B; MOTOR_C];  % motorports for left and right wheel
 
         mTurn1                      = NXTMotor(Ports(2)); % right motor
@@ -27,10 +26,10 @@ function turn(angle)
         mTurn1.ActionAtTachoLimit   = 'Brake';
 
         % where are we?
-        mTurn1.ResetPosition();
-        data                        = mTurn1.ReadFromNXT();
-        pos                         = data.Position;
-        mTurn1.TachoLimit           = int16(turnTicks + pos);
+%         mTurn1.ResetPosition();
+%         data                        = mTurn1.ReadFromNXT();
+%         pos                         = data.Position;
+        mTurn1.TachoLimit           = int16(turnTicks);
 
 
         mTurn2          = mTurn1; % copy data

@@ -1,6 +1,6 @@
-function [botSim, Estimated_Bot] = PFL(botSim, modifiedMap,num, maxNumOfIterations)
+function [botSim, Estimated_Bot] = PFL(botSim, modifiedMap,num, maxNumOfIterations,numscan,handle)
 %Particle Filter Localisation Function
-numscan = 64;
+%numscan = 6;
 
 
 botSim.setMap(modifiedMap);
@@ -25,7 +25,8 @@ variance = 100;   %variance
 damp = 0;
 while(converged == 0 && n < maxNumOfIterations) %%particle filter loop
     n = n+1; %increment the current number of iterations   
-    botScan = botSim.ultraScan(); %get a scan from the real robot.
+    %botScan = botSim.ultraScan(); %get a scan from the real robot.
+    botScan = robotUltrascan(numscan);
 
     
     %% Write code for updating your particles scans
@@ -51,10 +52,10 @@ while(converged == 0 && n < maxNumOfIterations) %%particle filter loop
 				[max_weight, max_pos] = max(new_weight);
 				weight(i) = max_weight; %choose weight on best pos among scans
 
-				particle_angle = particles(i).getBotAng() + max_pos*2*pi/scans;
+				particle_angle = particles(i).getBotAng() + max_pos*2*pi/numscan;
 				particles(i).setBotAng(mod(particle_angle, 2*pi));
 
-    end
+        end
 
     %Normalisation
 		Normalized_weight = rdivide(weight,sum(weight));
@@ -67,7 +68,6 @@ while(converged == 0 && n < maxNumOfIterations) %%particle filter loop
 			newParticle(i, 1:2) = particles(old_i).getBotPos();
 			newParticle(i, 3) = particles(old_i).getBotAng();
 		end
-
 
 		for i = 1:num
 			particles(i).setBotPos([newParticle(i,1), newParticle(i,2)]);
@@ -82,9 +82,11 @@ while(converged == 0 && n < maxNumOfIterations) %%particle filter loop
 
 		%Set the mean estimate
 		Estimated_Bot = BotSim(modifiedMap);
-		Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(scans));
+		Estimated_Bot.setScanConfig(Estimated_Bot.generateScanConfig(numscan));
 		Estimated_Bot.setBotPos(mean(positions));
 		Estimated_Bot.setBotAng(mean(angles));
+        
+        Estimated_Bot.drawBot(30,'g');
 
 		%% Write code to check for convergence
 
@@ -100,29 +102,43 @@ while(converged == 0 && n < maxNumOfIterations) %%particle filter loop
 %% Write code to take a percentage of your particles and respawn in randomised locations (important for robustness)
     
 
-		for i=1:0.01*num
-			particles(randi(num)).randomPose(0);
-		end
+        for i=1:0.01*num
+            particles(randi(num)).randomPose(0);
+        end
 
     %% Write code to decide how to move next
 
-		[max_botScan, max_index] = max(botScan);
+	[max_botScan, max_index] = max(botScan);
 
-    turn = (max_index-1)*2*pi/numscan;
-    move = botScan(max_index)*0.6;
-        
-    botSim.turn(turn);        
+    turn_angle = (max_index-1)*2*pi/numscan;
+    turn(turn_angle*180/pi);
+    
+    collision_scan = collisionscan();%after turning the robot, scan nearby to check if there is collision may caused
+    
+    move = min(collision_scan)*0.4;
+    
+    
+    
+    
+    %move = botScan(max_index)*0.2;
+    moveRobot(move*10);    
+    botSim.turn(turn_angle);        
     botSim.move(move); %move the real robot. These movements are recorded for marking 
-
+    
+    %turn(turn_angle*180/pi);
+    %moveRobot(move*10);
+    
+    
     for i =1:num %for all the particles.
-          particles(i).turn(turn);
+          particles(i).turn(turn_angle);
           particles(i).move(move);
     end
 end
 
 %% checking
 
-botScan = botSim.ultraScan();
+%botScan = botSim.ultraScan();
+botScan = robotUltrascan(numscan);
 
 for i=1:360
 	Estimated_BotScan = Estimated_Bot.ultraScan();
@@ -132,6 +148,9 @@ end
 
 [min_diff_mean, min_pos_mean] = min(diff_mean);
 Estimated_Bot.setBotAng(min_pos_mean*pi/180);
+
+NXT_PlayTone(1200,100, handle); %plays a tone
+NXT_PlayTone(800,800, handle); %plays a tone
 
 
 end

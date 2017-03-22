@@ -24,7 +24,7 @@ orientstd=1.5; %0.8; %orientation standard deviation in degrees
 mutation_rate=0.01; %pencetage of respawn parcticles to randomrised locations
 robot_size = 6;    
 inner_boundary = map;%Inflation(map, robot_size);
-Connecting_Distance=10; 
+Connecting_Distance=30; 
 
 %% Create Matrices for initialization
 particle_Scan = zeros(scans,num); 
@@ -279,80 +279,15 @@ for q = 1:Num_lines
     end   
 end
 
-% for q = Num_lines+1   %last line to complete the map (not necessary)
-%     x_node = inner_boundary(q,1) - map_x_min + origin_x_diff;
-%     x_node_next = inner_boundary(1,1) - map_x_min + origin_x_diff;
-%     y_node = inner_boundary(q,2) - map_y_min + origin_y_diff;
-%     y_node_next = inner_boundary(1,2) - map_y_min + origin_y_diff;
-%     
-%     if x_node > x_node_next
-%         x_high = x_node;
-%         x_low = x_node_next;
-%     else
-%         x_high = x_node_next;
-%         x_low = x_node;
-%     end   
-%     
-%     if y_node > y_node_next
-%         y_high = y_node;
-%         y_low = y_node_next;
-%     else
-%         y_high = y_node_next;
-%         y_low = y_node;
-%     end
-%     if (y_high == y_low || x_high == x_low)
-%         grid_map(y_low:y_high,x_low:x_high) = 1;
-%         test = 0
-%     elseif (y_node_next>y_node && x_node_next>x_node)% || (y_node_next<y_node && x_node_next<x_node)
-%         test = 1
-%         for i = 1:(x_high-x_low)    
-%         grid_map(round(y_node+(y_node_next-y_node)*i/(x_node_next-x_node)),(x_node+i)) = 1;
-%         end
-%     elseif (y_node_next<y_node && x_node_next<x_node)
-%         test = 2
-%         for i = 1:(x_high-x_low)    
-%         grid_map(round(y_node-(y_node-y_node_next)*i/(x_node-x_node_next)),(x_node-i)) = 1;
-%         end  
-%     elseif (y_node_next>y_node && x_node_next<x_node)
-%         test = 3
-%         for i = 1:(x_high-x_low)
-%         grid_map(round(y_node+(y_node_next-y_node)*i/(x_node_next-x_node)),x_node-i) = 1;
-%         end    
-%     elseif (y_node_next<y_node && x_node_next>x_node)
-%         test = 4
-%         for i = 1:(x_high-x_low)
-%         grid_map(round(y_node-(y_node-y_node_next)*i/(x_node_next-x_node)),x_node+i) = 1;
-%         end    
-%     end 
-% end 
-
-for m = 6:(map_x_size-5)
- 	for n = 6:(map_y_size-5)
+for m = 16:(map_x_size-15)
+ 	for n = 16:(map_y_size-15)
     	if grid_map(n,m)==1
-             inflated_grid_map(n-1,m-1)=1;
-             inflated_grid_map(n-1,m+1)=1;
-             inflated_grid_map(n+1,m-1)=1;
-             inflated_grid_map(n+1,m+1)=1;
-             
-             inflated_grid_map(n-2,m-2)=1;
-             inflated_grid_map(n-2,m+2)=1;
-             inflated_grid_map(n+2,m-2)=1;
-             inflated_grid_map(n+2,m+2)=1;
-             
-             inflated_grid_map(n-3,m-3)=1;
-             inflated_grid_map(n-3,m+3)=1;
-             inflated_grid_map(n+3,m-3)=1;
-             inflated_grid_map(n+3,m+3)=1;
-             
-             inflated_grid_map(n-4,m-4)=1;
-             inflated_grid_map(n-4,m+4)=1;
-             inflated_grid_map(n+4,m-4)=1;
-             inflated_grid_map(n+4,m+4)=1;
-             
-             inflated_grid_map(n-5,m-5)=1;
-             inflated_grid_map(n-5,m+5)=1;
-             inflated_grid_map(n+5,m-5)=1;
-             inflated_grid_map(n+5,m+5)=1;
+            for p = 1:15
+             inflated_grid_map(n-p,m-p)=1;
+             inflated_grid_map(n-p,m+p)=1;
+             inflated_grid_map(n+p,m-p)=1;
+             inflated_grid_map(n+p,m+p)=1;
+            end          
         end
     end
 end
@@ -384,7 +319,8 @@ if botSim.debug()
     end
 end
 
-waypoints = OptimalPath - origin_x_diff;
+waypoints_temp = OptimalPath - origin_x_diff;
+waypoints = optimisePath(waypoints_temp)
 num_waypoints = numel(waypoints)/2;
 target_waypoints_x = waypoints(1,2);
 target_waypoints_y = waypoints(1,1);
@@ -427,17 +363,19 @@ for m = 1:(num_waypoints-1)
     Estimated_angle = Estimated_Bot.getBotAng();
     Estimated_BotScan = Estimated_Bot.ultraScan();
     %botScan = botSim.ultraScan();
-    botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
-    difference = sqrt(sum((Estimated_BotScan-botScan).^2));
-    
-    if (botScan(1)>= distance + 3)&&(difference < 1000);
+    OpenUltrasonic(SENSOR_4);
+    botScan = GetUltrasonic(SENSOR_4); %robotUltrascan(1);  %get a scan from ultrasonic sensor
+    CloseSensor(SENSOR_4);
+    %botScan = robotUltrascan(scans);  %get a scan from ultrasonic sensor
+%     difference = sqrt(sum((Estimated_BotScan-botScan).^2));
+%     
+%     if (botScan(1)>= distance + 3)&&(difference < 1000);
         Estimated_position = Estimated_Bot.getBotPos();
         botSim.move(round(distance));
         moveRobot(uint16(round(distance*10))); %move the real robot
         Estimated_Bot.move(round(distance));
         Estimated_position = Estimated_Bot.getBotPos();
-
-    else
+%     else
     stage = 0
     particles(num,1) = BotSim; %how to set up a vector of objects
     Estimated_Bot.randomPose(Min_distance);

@@ -1,7 +1,7 @@
 function moveRobot(distance) % distance in milimeters
     % const will be determined by measurement
     const   = 42*pi/360; % diameter of wheel ~42mm, 360dgs~360click
-    dist    = 1.0*distance/const;
+    dist    = 1.115*distance/const;
     
     % motor speed
     power = 100;
@@ -11,12 +11,11 @@ function moveRobot(distance) % distance in milimeters
     mStraight = NXTMotor(Ports); 
     mStraight.Stop('off'); % initialise motors
     mStraight.SpeedRegulation = false; % not sure what this actually mean
-    mStraight.SmoothStart = true;
     mStraight.Power = power;
     mStraight.ActionAtTachoLimit = 'Brake';
     
     % reset position to 0
-      mStraight.ResetPosition();
+    mStraight.ResetPosition();
     
     % where do we want to go?
     % account for errors, i.e. if pos is not 0
@@ -30,16 +29,18 @@ function moveRobot(distance) % distance in milimeters
     % where are we?
     data    = mStraight.ReadFromNXT();
     pos     = data.Position
-
-    % check position after movement!
-    mStraight.TachoLimit              = abs(round(pos-tacholimit))
-    if mStraight.TachoLimit > 0
-        if pos-tacholimit < 0
-            mStraight.Power = -power;
-        end
-        % move
-        mStraight.SendToNXT();
-        mStraight.WaitFor();
+    
+    tacholimit              = round(pos);
+    mStraight.TachoLimit    = tacholimit;
+    
+    % check position after movement
+    if pos > 0
+        mStraight.Power = power;
+    elseif pos < 0
+        mStraight.Power = -power;
     end
-
+    
+    % move
+    mStraight.SendToNXT();
+    mStraight.WaitFor();
 end
